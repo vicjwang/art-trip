@@ -1,32 +1,52 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
 import { Carousel } from 'react-bootstrap'
-import artworks from './artworks.csv';
-import * as d3 from 'd3';
-
 
 class Gallery extends React.Component {
 
-    loadArtworks() {
-        console.log(artworks);
-        d3.csv(artworks).then(function(data) {
-            console.log(data[0]);
-        });
+  constructor(props) {
+    super(props);
+    this.previewRef = React.createRef()
+    this.frameRef = React.createRef()
+    this.handleNext = this.handleNext.bind(this)
+    this.state = {
+      currentIndex: 0,
     }
+  }
 
-    constructor(props) {
-      super(props);
-      this.loadArtworks();
-    }
+  handleNext(e) {
+    this.setState({
+      currentIndex: this.state.currentIndex + 1
+    })
+  }
 
-    render() {
-      return (
-        <Carousel>
-          <Carousel.Item>
-            <img width={900} height={500} alt="900x500" src="http://www.moma.org/media/W1siZiIsIjU5NDA1Il0sWyJwIiwiY29udmVydCIsIi1yZXNpemUgMzAweDMwMFx1MDAzZSJdXQ.jpg?sha=137b8455b1ec6167"/>
-          </Carousel.Item>
-        </Carousel>
-      );
+  render() {
+    var isFullscreen = this.props.isFullscreen;
+    if (isFullscreen) {
+      this.frameRef.current.webkitRequestFullscreen()
     }
+    return (
+      <div>
+        <div class="frame" ref={ this.frameRef }>
+          { isFullscreen &&
+          <img src={ this.props.artworks[this.state.currentIndex].ThumbnailURL } />
+          }
+          { this.state.currentIndex < this.props.artworks.length - 1 &&
+            <button onClick={ this.handleNext }>Next</button>
+          }
+        </div>
+        <div class="preview" ref={ this.previewRef }>
+          { this.props.artworks.map((artwork, i) => (
+            <div key={i}>
+              <h2>{ artwork.Title }</h2>
+              <h3>{ artwork.Artist }</h3>
+              <img src={ artwork.ThumbnailURL } />
+            </div>
+         )) }
+        </div>
+      </div>
+    );
+  }
 }
 
 
