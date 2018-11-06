@@ -31,7 +31,8 @@ class Gallery extends React.Component {
           { isFullscreen &&
           <img src={ this.props.artworks[this.state.currentIndex].ThumbnailURL } />
           }
-          { this.state.currentIndex < this.props.artworks.length - 1 &&
+          <br />
+          { isFullscreen && this.state.currentIndex < this.props.artworks.length - 1 &&
             <button onClick={ this.handleNext }>Next</button>
           }
         </div>

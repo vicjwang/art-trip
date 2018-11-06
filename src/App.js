@@ -30,6 +30,7 @@ class App extends Component {
       data: null,
       isLoading: true,
       isFullscreen: false,
+      currentIndex: 0
     };
   }
 
@@ -39,7 +40,6 @@ class App extends Component {
     d3.csv(allArtworks).then(function(data) {
       var artists = d3.nest()
         .key(function(d) { return d.Artist }).sortKeys(d3.ascending)
-    //    .rollup(function(leaves) { return leaves.length; })
         .entries(data).map(x => ({ label: x.key, value: x.key }));
 
       th.setState({
@@ -60,11 +60,6 @@ class App extends Component {
 
     var artworks = this.state.data.filter(row => row.Artist && row.Artist.toLowerCase().includes(string));
     this.setState({ artworks: artworks.slice(0, length) });
-
-    // Toggle hide
-
-    // Fullscreen
-    
   }
 
   handleRandom(e) {
@@ -93,7 +88,7 @@ class App extends Component {
   }
 
   handleStart(e) {
-    this.setState({ isFullscreen: true })
+    this.setState({ isFullscreen: true, currentIndex: 0 })
   }
 
   render() {
@@ -108,7 +103,7 @@ class App extends Component {
         </form>
         <button onClick={ this.handleStart }>Start!</button>
         <h3>{ this.state.isLoading ? "Loading.." : "" }</h3>
-        <Gallery artworks={ this.state.artworks } isFullscreen={ this.state.isFullscreen } currentIndex={0}/>
+        <Gallery artworks={ this.state.artworks } isFullscreen={ this.state.isFullscreen } currentIndex={ this.state.currentIndex }/>
       </div>
     );
   }
