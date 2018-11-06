@@ -1,0 +1,24 @@
+Wed 10/31/2018
+Current: Parse csv from moma list of artworks.
+Open q: save that file locally to speed up? but chrome can't use fetch on file://
+Next: filter artworks by <category>. loop thru and time with song?
+
+Fri 11/2/2018
+Current: working d3.csv load artworks locally
+Next:
+- function to filter artworks by category
+- spotify api to retrieve playlist
+- play song and sync with artworks
+
+
+App.js loads data, and passes relevant/filtered data to components
+
+Sat 11/3/2018
+Current: wrap up all form data into single submit to filter artworks then display
+
+Sun 11/4/2018
+Current: finished art display part
+Next:
+- spotify api oauth aka connect with your spotify. store access token in cookie
+- play song and sync with artworks
+- github pages
