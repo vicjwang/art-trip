@@ -5,9 +5,10 @@ import { shuffleArray } from './Utils.js'
 const SPOTIFY_API_DOMAIN = "https://api.spotify.com"
 const GET_USER_PATH = "/v1/me"
 const GET_PLAYLISTS_PATH = "/v1/me/playlists"
+const PUT_PLAY_PATH = "/v1/me/player/play"
 
 
-class SpotifyPlaylist extends React.Component {
+class SpotifyPlaylistSelect extends React.Component {
 	constructor(props) {
 		super(props)
 		this.state = {
@@ -34,7 +35,7 @@ class SpotifyPlaylist extends React.Component {
 
 	render() {
 		return (
-			<p>
+			<div>
 				<p>Select playlist:</p>
 
 				<select name="playlist" onChange={ this.props.handlePlaylistSelect } multiple>
@@ -43,24 +44,20 @@ class SpotifyPlaylist extends React.Component {
 					)) }
 
 				</select>
-			</p>
+			</div>
 		)
 	}
 }
 
-class SpotifyControl extends React.Component {
+class SpotifyPlayerControl extends React.Component {
 	constructor(props) {
 		super(props)
-		this.fetchSongsFromPlaylist = this.fetchSongsFromPlaylist.bind(this)
-		this.playSongs = this.playSongs.bind(this)
-		this.state = {
-			isPlaying: this.props.isPlaying,
-			playlistURI: this.props.playlistURI
-		}
+		this.fetchTrackURIsFromPlaylist = this.fetchTrackURIsFromPlaylist.bind(this)
+		this.playTracks = this.playTracks.bind(this)
 	}
 
-	fetchSongsFromPlaylist() {
-		fetch(this.state.playlistURI, {
+	fetchTrackURIsFromPlaylist() {
+		fetch(this.props.playlistURI, {
 			method: "get",
 			headers: new Headers({
 				"Authorization": "Bearer " + this.props.accessToken
@@ -68,31 +65,43 @@ class SpotifyControl extends React.Component {
 		})
 		.then(results => { return results.json(); })
 		.then(data => {
-			console.log("fetching songs from playlist")
-			console.log(data)
+			var tracks = data.tracks.items
+			var shuffledTracks = shuffleArray(tracks)
+			var trackURIs = []
+			shuffledTracks.map((item, i) => {
+				trackURIs.push(item.track.uri)
+			})
+			this.playTracks(trackURIs)
 		})
 	}
 
-	playSongs(songs) {
-		console.log("play!")
+	playTracks(trackURIs) {
+		var body = {
+			uris: trackURIs
+		}
+		fetch(SPOTIFY_API_DOMAIN + PUT_PLAY_PATH, {
+			method: "put",
+			body: JSON.stringify(body),
+			headers: new Headers({
+				"Authorization": "Bearer " + this.props.accessToken
+			})
+		})
+		.then(results => { return results.json() })
+		.then(data => {
+		})
+
 	}
 
 	render() {
 
-		console.log("spotify control render")
-		console.log(this.state.isPlaying)
-		console.log(this.state.playlistURI)
-
-		if (this.state.isPlaying && this.state.playlistURI) {
-			var songs = this.fetchSongsFromPlaylist()
-			var shuffledSongs = shuffleArray(songs)
-			this.playSongs(songs)
+		if (this.props.isPlaying && this.props.playlistURI) {
+			var trackURIs = this.fetchTrackURIsFromPlaylist()
 		}
 
 		return (
-			<p>
+			<div className="spotify-control">
 				control!
-			</p>
+			</div>
 		)
 	}
 
@@ -106,13 +115,10 @@ class SpotifyPlayer extends React.Component {
 		this.state = {
 			spotify_user_id: null,
 			playlistURI: null,
-			isPlaying: this.props.isPlaying
 		}
 	}
 
 	handlePlaylistSelect(e) {
-		console.log("select")
-		console.log(e.target.value)
 		this.setState({
 			playlistURI: e.target.value
 		})
@@ -128,7 +134,6 @@ class SpotifyPlayer extends React.Component {
 		})
 		.then(results => { return results.json(); })
 		.then(data => {
-			console.log(data)
 			this.setState({
 				"user_id": data.id
 			})
@@ -142,12 +147,12 @@ class SpotifyPlayer extends React.Component {
 
 	render() {
 		return (
-			<p>
-				<SpotifyPlaylist accessToken={ this.props.accessToken } user_id={ this.user_id } handlePlaylistSelect={ this.handlePlaylistSelect }/>
+			<div className="spotify-player">
+				<SpotifyPlaylistSelect accessToken={ this.props.accessToken } user_id={ this.user_id } handlePlaylistSelect={ this.handlePlaylistSelect }/>
 
 				{ this.state.playlistURI }
-				<SpotifyControl playlistURI={ this.state.playlistURI } isPlaying= { this.state.isPlaying } />
-			</p>
+				<SpotifyPlayerControl playlistURI={ this.state.playlistURI } isPlaying= { this.props.isPlaying } accessToken={ this.props.accessToken }/>
+			</div>
 		)
 	}
 }

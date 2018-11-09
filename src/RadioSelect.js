@@ -23,7 +23,7 @@ class RadioSelect extends Component {
       <div>
         { this.props.label }
         { this.props.options.map((option, i) => (
-          <label>
+          <label key={i}>
             { option.label }
             <input
               type="radio"

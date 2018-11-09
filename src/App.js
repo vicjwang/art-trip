@@ -1,11 +1,12 @@
-import React, { Component } from 'react'; import logo from './logo.svg';
-import './App.css';
-import allArtworks from './artworks.csv';
-import * as d3 from 'd3';
-import Gallery from './Gallery.js';
-import RadioSelect from './RadioSelect.js';
-import SpotifyLogin from './SpotifyLogin.js';
-import SpotifyPlayer from './SpotifyPlayer.js';
+import React, { Component } from 'react';
+import './App.css'
+import allArtworks from './artworks.csv'
+import * as d3 from 'd3'
+import MainDisplay from './MainDisplay.js'
+import PreviewDisplay from './PreviewDisplay.js'
+import RadioSelect from './RadioSelect.js'
+import SpotifyLogin from './SpotifyLogin.js'
+import SpotifyPlayer from './SpotifyPlayer.js'
 
 
 const options = [
@@ -20,6 +21,16 @@ const galleryLengthOptions = [
   { value: 5, label: "5", name: "gallery-length" },
 ];
 
+
+function getAccessTokenFromURL(url) {
+	if (url.hash) {
+		return url.hash.split("access_token=")[1].split("&")[0]
+	} else {
+		return null
+	}
+
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -27,11 +38,8 @@ class App extends Component {
     this.handleRandom = this.handleRandom.bind(this)
     this.handleStart = this.handleStart.bind(this)
 
-		var url = new URL(window.location.href)
-		var accessToken = null
-		if (url.hash) {
-			accessToken = url.hash.split("access_token=")[1].split("&")[0]
-		}
+		this.mainDisplayRef = React.createRef()
+
     this.state = {
       artists: [],
       artworks: [],
@@ -39,7 +47,7 @@ class App extends Component {
       isLoading: true,
       isFullscreen: false,
       currentIndex: 0,
-			spotifyAccessToken: accessToken,
+			spotifyAccessToken: getAccessTokenFromURL(new URL(window.location.href)),
 			isPlaying: false
     };
   }
@@ -102,23 +110,49 @@ class App extends Component {
   }
 
   render() {
+
+    var isFullscreen = this.state.isFullscreen
+
+    if (isFullscreen) {
+      this.mainDisplayRef.current.webkitRequestFullscreen()
+    }
+
     return (
-      <div className="App">
+			<div className="app-container App">
+
         <h1>Art Trip</h1>
-				{ this.state.spotifyAccessToken ?
-					<SpotifyPlayer accessToken={ this.state.spotifyAccessToken } isPlaying={ this.state.isPlaying }/>
-					:
-					<SpotifyLogin /> }
-        <form onSubmit={ this.handleSubmit }>
-          <RadioSelect label="How many?" options={ galleryLengthOptions } selectedValue="3" />
-          <input name="search" type="text" placeholder="Search artist" />
-          <button type="submit">Find</button>
-          <button onClick={ this.handleRandom }>Random</button>
-        </form>
-        <button onClick={ this.handleStart }>Start!</button>
-        <h3>{ this.state.isLoading ? "Loading.." : "" }</h3>
-        <Gallery artworks={ this.state.artworks } isFullscreen={ this.state.isFullscreen } currentIndex={ this.state.currentIndex }/>
-      </div>
+				<div className="inputs-container">
+
+					// Set music
+					{ this.state.spotifyAccessToken ?
+						<SpotifyPlayer accessToken={ this.state.spotifyAccessToken } isPlaying={ this.state.isPlaying }/>
+						:
+						<SpotifyLogin /> }
+					<br />
+
+					// Set parameters
+					<form onSubmit={ this.handleSubmit }>
+						<RadioSelect label="How many songs?" options={ galleryLengthOptions } selectedValue="3" />
+						<input name="search" type="text" placeholder="Search artist" />
+						<button type="submit">Find</button>
+						<button onClick={ this.handleRandom }>Random</button>
+					</form>
+					<br />
+					<button onClick={ this.handleStart }>Start!</button>
+
+				</div>
+				<h3>{ this.state.isLoading ? "Loading.." : "" }</h3>
+				<div className="main-display-container" ref={ this.mainDisplayRef }>
+					{ isFullscreen &&
+							<MainDisplay artworks={ this.state.artworks }/>
+					}
+				</div>
+				<div className="preview-display-container">
+					{ !isFullscreen &&
+							<PreviewDisplay artworks={ this.state.artworks }/>
+					}
+				</div>
+			</div>
     );
   }
 }
