@@ -4,6 +4,8 @@ import allArtworks from './artworks.csv';
 import * as d3 from 'd3';
 import Gallery from './Gallery.js';
 import RadioSelect from './RadioSelect.js';
+import SpotifyLogin from './SpotifyLogin.js';
+import SpotifyPlayer from './SpotifyPlayer.js';
 
 
 const options = [
@@ -21,16 +23,24 @@ const galleryLengthOptions = [
 class App extends Component {
   constructor(props) {
     super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleRandom = this.handleRandom.bind(this);
-    this.handleStart = this.handleStart.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleRandom = this.handleRandom.bind(this)
+    this.handleStart = this.handleStart.bind(this)
+
+		var url = new URL(window.location.href)
+		var accessToken = null
+		if (url.hash) {
+			accessToken = url.hash.split("access_token=")[1].split("&")[0]
+		}
     this.state = {
       artists: [],
       artworks: [],
       data: null,
       isLoading: true,
       isFullscreen: false,
-      currentIndex: 0
+      currentIndex: 0,
+			spotifyAccessToken: accessToken,
+			isPlaying: false
     };
   }
 
@@ -88,13 +98,17 @@ class App extends Component {
   }
 
   handleStart(e) {
-    this.setState({ isFullscreen: true, currentIndex: 0 })
+    this.setState({ isFullscreen: true, currentIndex: 0, isPlaying: true })
   }
 
   render() {
     return (
       <div className="App">
         <h1>Art Trip</h1>
+				{ this.state.spotifyAccessToken ?
+					<SpotifyPlayer accessToken={ this.state.spotifyAccessToken } isPlaying={ this.state.isPlaying }/>
+					:
+					<SpotifyLogin /> }
         <form onSubmit={ this.handleSubmit }>
           <RadioSelect label="How many?" options={ galleryLengthOptions } selectedValue="3" />
           <input name="search" type="text" placeholder="Search artist" />
