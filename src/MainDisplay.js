@@ -19,13 +19,19 @@ class MainDisplay extends React.Component {
     })
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      currentIndex: this.props.currentIndex
+    })
+
+  }
 
 	render() {
 		return (
 			<div className="main-display">
-				<img src={ this.state.artworks[this.props.currentIndex].ThumbnailURL } />
+				<img src={ this.state.artworks[this.state.currentIndex].ThumbnailURL } />
 				<br />
-				{ this.props.currentIndex < this.props.artworks.length - 1 &&
+				{ this.state.currentIndex < this.props.artworks.length - 1 &&
 					<button onClick={ this.handleNext }>Next</button>
 				}
 
