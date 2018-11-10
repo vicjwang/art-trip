@@ -87,6 +87,10 @@ class SpotifyPlayerControl extends React.Component {
 			})
 		})
 		.then(results => { return results.json() })
+        .catch(error => {
+          console.log("play tracks error")
+          console.log(error)
+        })
 		.then(data => {
 		})
 

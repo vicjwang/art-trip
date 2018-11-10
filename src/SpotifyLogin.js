@@ -13,7 +13,8 @@ const SCOPES = [
 	"user-read-private",
 	"playlist-read-private",
 	"playlist-read-collaborative",
-	"user-modify-playback-state"
+	"user-modify-playback-state",
+    "user-read-currently-playing"
 ]
 
 class SpotifyLogin extends React.Component {

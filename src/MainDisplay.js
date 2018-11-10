@@ -7,8 +7,8 @@ class MainDisplay extends React.Component {
     this.handleNext = this.handleNext.bind(this)
 
 		this.state = {
-			currentIndex: 0,
-			artworks: this.props.artworks
+			artworks: this.props.artworks,
+            currentIndex: this.props.currentIndex
 		}
 	}
 
@@ -23,9 +23,9 @@ class MainDisplay extends React.Component {
 	render() {
 		return (
 			<div className="main-display">
-				<img src={ this.state.artworks[this.state.currentIndex].ThumbnailURL } />
+				<img src={ this.state.artworks[this.props.currentIndex].ThumbnailURL } />
 				<br />
-				{ this.state.currentIndex < this.props.artworks.length - 1 &&
+				{ this.props.currentIndex < this.props.artworks.length - 1 &&
 					<button onClick={ this.handleNext }>Next</button>
 				}
 

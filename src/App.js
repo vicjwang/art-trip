@@ -21,6 +21,7 @@ const galleryLengthOptions = [
   { value: 5, label: "5", name: "gallery-length" },
 ];
 
+const SPOTIFY_POLLING_INTERVAL = 5000;  // in ms
 
 function getAccessTokenFromURL(url) {
 	if (url.hash) {
@@ -28,8 +29,8 @@ function getAccessTokenFromURL(url) {
 	} else {
 		return null
 	}
-
 }
+
 
 class App extends Component {
   constructor(props) {
@@ -37,6 +38,7 @@ class App extends Component {
     this.handleSubmit = this.handleSubmit.bind(this)
     this.handleRandom = this.handleRandom.bind(this)
     this.handleStart = this.handleStart.bind(this)
+    this.pollSpotifyCurrentlyPlaying = this.pollSpotifyCurrentlyPlaying.bind(this)
 
 		this.mainDisplayRef = React.createRef()
 
@@ -47,8 +49,10 @@ class App extends Component {
       isLoading: true,
       isFullscreen: false,
       currentIndex: 0,
-			spotifyAccessToken: getAccessTokenFromURL(new URL(window.location.href)),
-			isPlaying: false
+      spotifyAccessToken: getAccessTokenFromURL(new URL(window.location.href)),
+      isPlaying: false,
+      currentTrackURI: null,
+      isNextPrepared: false
     };
   }
 
@@ -105,8 +109,58 @@ class App extends Component {
     this.setState({ artworks: artworks.slice(0, length) });
   }
 
+  pollSpotifyCurrentlyPlaying() {
+    console.log("poll")
+    // hit context
+    fetch("https://api.spotify.com/v1/me/player/currently-playing", {
+      method: "get",
+      headers: new Headers({
+          "Authorization": "Bearer " + this.state.spotifyAccessToken
+      })
+    }).then(results => { return results.json() })
+    .catch(function(error) {
+      console.log("first error")
+    })
+    .then(data => {
+      console.log("data")
+      console.log(data)
+
+      console.log("is playing")
+      console.log(data.is_playing)
+console.log(data.progress_ms)
+console.log(data.item.duration_ms)
+
+      // is playing and within end of song, incr index
+      if (data.is_playing && data.progress_ms >= data.item.duration_ms - SPOTIFY_POLLING_INTERVAL*2 && this.state.currentIndex < this.state.artworks.length - 1) {
+        
+        setTimeout(() => {
+          this.setState({
+            currentIndex: this.state.currentIndex + 1,
+            isNextPrepared: false
+          })
+        }, data.duration_ms - data.progress_ms)
+        console.log("new song")
+        this.setState({
+          isNextPrepared: true
+        })
+      }
+
+      // is playing, set timeout to poll aagain
+      if (data.is_playing) {
+        setTimeout(this.pollSpotifyCurrentlyPlaying, SPOTIFY_POLLING_INTERVAL)
+      }
+    })
+    .catch(function(error) {
+      console.log("second error")
+    })
+
+  }
+
   handleStart(e) {
     this.setState({ isFullscreen: true, currentIndex: 0, isPlaying: true })
+    // poll current song context to advance currentIndex
+    setTimeout(this.pollSpotifyCurrentlyPlaying, SPOTIFY_POLLING_INTERVAL)
+
   }
 
   render() {
@@ -115,6 +169,7 @@ class App extends Component {
 
     if (isFullscreen) {
       this.mainDisplayRef.current.webkitRequestFullscreen()
+
     }
 
     return (
@@ -144,7 +199,7 @@ class App extends Component {
 				<h3>{ this.state.isLoading ? "Loading.." : "" }</h3>
 				<div className="main-display-container" ref={ this.mainDisplayRef }>
 					{ isFullscreen &&
-							<MainDisplay artworks={ this.state.artworks }/>
+							<MainDisplay artworks={ this.state.artworks } currentIndex={ this.state.currentIndex }/>
 					}
 				</div>
 				<div className="preview-display-container">

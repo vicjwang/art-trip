@@ -56,10 +56,15 @@ Fri 11/9/2018
 MVP working.
 
 Next:
+    - auto advance art when next song plays
 	- make fullscreen images bigger
 	- spotify play error message
 	- escape out of full screen also stops music
 	- start button chooses device of current browser
 	- find button is broken. plays music and goes to full screen.
+    - end gracefully
 
 $ npm run deploy
+
+need to pass currentIndex between to mainframe
+
