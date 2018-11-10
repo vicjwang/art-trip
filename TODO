@@ -68,3 +68,5 @@ $ npm run deploy
 
 need to pass currentIndex between to mainframe
 
+
+After escaping, buttons are weird. hitting random starts experience again.

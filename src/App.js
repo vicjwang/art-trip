@@ -110,7 +110,6 @@ class App extends Component {
   }
 
   pollSpotifyCurrentlyPlaying() {
-    console.log("poll")
     // hit context
     fetch("https://api.spotify.com/v1/me/player/currently-playing", {
       method: "get",
@@ -120,15 +119,9 @@ class App extends Component {
     }).then(results => { return results.json() })
     .catch(function(error) {
       console.log("first error")
+      console.log(error)
     })
     .then(data => {
-      console.log("data")
-      console.log(data)
-
-      console.log("is playing")
-      console.log(data.is_playing)
-console.log(data.progress_ms)
-console.log(data.item.duration_ms)
 
       // is playing and within end of song, incr index
       if (data.is_playing && data.progress_ms >= data.item.duration_ms - SPOTIFY_POLLING_INTERVAL*2 && this.state.currentIndex < this.state.artworks.length - 1) {
@@ -139,7 +132,6 @@ console.log(data.item.duration_ms)
             isNextPrepared: false
           })
         }, data.duration_ms - data.progress_ms)
-        console.log("new song")
         this.setState({
           isNextPrepared: true
         })
@@ -152,6 +144,7 @@ console.log(data.item.duration_ms)
     })
     .catch(function(error) {
       console.log("second error")
+      console.log(error)
     })
 
   }
@@ -160,7 +153,6 @@ console.log(data.item.duration_ms)
     this.setState({ isFullscreen: true, currentIndex: 0, isPlaying: true })
     // poll current song context to advance currentIndex
     setTimeout(this.pollSpotifyCurrentlyPlaying, SPOTIFY_POLLING_INTERVAL)
-
   }
 
   render() {
@@ -169,7 +161,6 @@ console.log(data.item.duration_ms)
 
     if (isFullscreen) {
       this.mainDisplayRef.current.webkitRequestFullscreen()
-
     }
 
     return (
