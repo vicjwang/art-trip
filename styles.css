@@ -1,0 +1,14 @@
+
+.main-display {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.main-display > img {
+	padding: 0;
+    display: block;
+    margin: 0 auto;
+    height: 90%;
+    max-width: 100%;
+}
