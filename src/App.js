@@ -52,7 +52,8 @@ class App extends Component {
       spotifyAccessToken: getAccessTokenFromURL(new URL(window.location.href)),
       isPlaying: false,
       currentTrackURI: null,
-      isNextPrepared: false
+      isNextPrepared: false,
+      toPlay: false,
     };
   }
 
@@ -111,6 +112,7 @@ class App extends Component {
 
   pollSpotifyCurrentlyPlaying() {
     // hit context
+    console.log("poll")
     fetch("https://api.spotify.com/v1/me/player/currently-playing", {
       method: "get",
       headers: new Headers({
@@ -122,11 +124,19 @@ class App extends Component {
       console.log(error)
     })
     .then(data => {
-
+  
+    
+    console.log("data.progress_ms " + data.progress_ms)
+    console.log("data.item.duration_ms " + (data.item.duration_ms - 10000))
+    console.log("this.state.currentIndex " + this.state.currentIndex)
+    console.log(data.is_playing && data.progress_ms >= data.item.duration_ms - SPOTIFY_POLLING_INTERVAL*2)
       // is playing and within end of song, incr index
+/*
       if (data.is_playing && data.progress_ms >= data.item.duration_ms - SPOTIFY_POLLING_INTERVAL*2 && this.state.currentIndex < this.state.artworks.length - 1) {
         
+        console.log("prepare for next song")
         setTimeout(() => {
+          console.log("advancing ")
           this.setState({
             currentIndex: this.state.currentIndex + 1,
             isNextPrepared: false
@@ -141,6 +151,7 @@ class App extends Component {
       if (data.is_playing) {
         setTimeout(this.pollSpotifyCurrentlyPlaying, SPOTIFY_POLLING_INTERVAL)
       }
+      */
     })
     .catch(function(error) {
       console.log("second error")
@@ -150,7 +161,7 @@ class App extends Component {
   }
 
   handleStart(e) {
-    this.setState({ isFullscreen: true, currentIndex: 0, isPlaying: true })
+    this.setState({ isFullscreen: true, currentIndex: 0, toPlay: true })
     // poll current song context to advance currentIndex
     setTimeout(this.pollSpotifyCurrentlyPlaying, SPOTIFY_POLLING_INTERVAL)
   }
@@ -171,7 +182,7 @@ class App extends Component {
 
 					// Set music
 					{ this.state.spotifyAccessToken ?
-						<SpotifyPlayer accessToken={ this.state.spotifyAccessToken } isPlaying={ this.state.isPlaying }/>
+						<SpotifyPlayer accessToken={ this.state.spotifyAccessToken } toPlay={ this.state.toPlay } isPlaying={ this.state.isPlaying }/>
 						:
 						<SpotifyLogin /> }
 					<br />

@@ -54,6 +54,10 @@ class SpotifyPlayerControl extends React.Component {
 		super(props)
 		this.fetchTrackURIsFromPlaylist = this.fetchTrackURIsFromPlaylist.bind(this)
 		this.playTracks = this.playTracks.bind(this)
+        this.state = {
+          isPlaying: this.props.isPlaying,
+          toPlay: this.props.toPlay
+        }
 	}
 
 	fetchTrackURIsFromPlaylist() {
@@ -72,6 +76,11 @@ class SpotifyPlayerControl extends React.Component {
 				trackURIs.push(item.track.uri)
 			})
 			this.playTracks(trackURIs)
+            console.log("setting toPlay to false")
+            this.setState({
+              toPlay: false,
+              isPlaying: true
+            })
 		})
 	}
 
@@ -96,9 +105,20 @@ class SpotifyPlayerControl extends React.Component {
 
 	}
 
-	render() {
+    componentWillReceiveProps(nextProps) {
+      console.log("control willreceiveprops this.props.toPlay " + this.props.toPlay)
+      console.log("control willreceiveprops this.props.isplaying " + this.props.isPlaying)
+      this.setState({
+        toPlay: nextProps.toPlay,
+        isPlaying: nextProps.isPlaying
+      })
+    }
 
-		if (this.props.isPlaying && this.props.playlistURI) {
+	render() {
+        console.log("control render this.state.toplay " + this.state.toPlay)
+        console.log("control render this.state.isplaying " + this.state.isPlaying)
+
+		if (this.state.toPlay && !this.state.isPlaying && this.props.playlistURI) {
 			var trackURIs = this.fetchTrackURIsFromPlaylist()
 		}
 
@@ -150,12 +170,14 @@ class SpotifyPlayer extends React.Component {
 	}
 
 	render() {
+        console.log("player render this.props.toPlay " + this.props.toPlay)
+        console.log("player render this.props.isPlaying " + this.props.isPlaying)
 		return (
 			<div className="spotify-player">
 				<SpotifyPlaylistSelect accessToken={ this.props.accessToken } user_id={ this.user_id } handlePlaylistSelect={ this.handlePlaylistSelect }/>
 
 				{ this.state.playlistURI }
-				<SpotifyPlayerControl playlistURI={ this.state.playlistURI } isPlaying= { this.props.isPlaying } accessToken={ this.props.accessToken }/>
+				<SpotifyPlayerControl playlistURI={ this.state.playlistURI } toPlay={ this.props.toPlay } accessToken={ this.props.accessToken } isPlaying={ this.props.isPlaying }/>
 			</div>
 		)
 	}
